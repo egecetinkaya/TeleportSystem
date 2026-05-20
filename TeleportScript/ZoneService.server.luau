@@ -13,6 +13,15 @@ game.Players.PlayerAdded:Connect(function(player)
 	OpenedZones.Name = "OpenedZones"
 	OpenedZones.Parent = player
 	
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+	
+	local Gold = Instance.new("IntValue")
+	Gold.Name = "Gold"
+	Gold.Value = 100000
+	Gold.Parent = leaderstats
+	
 	for _, zone in pairs(Zones:GetChildren()) do
 		local ZonesBool = Instance.new("BoolValue")
 		ZonesBool.Name = zone.Name
@@ -43,12 +52,13 @@ for _, zone in pairs(Zones:GetChildren()) do
 	if zone.Name == "Zone1" then
 
 	else 
-		local Price = zone:GetAttribute("Price") or "0"
+		local Price = tonumber(zone:GetAttribute("Price")) or 0
 		local realName = zone:GetAttribute("ZoneName") or zone.Name		
 		local ProximityPrompt = Instance.new("ProximityPrompt")
 		ProximityPrompt.ObjectText = zone:GetAttribute("ZoneName") or zone.Name
 		ProximityPrompt.ActionText = "[E] Buy (" .. Price  .. "$)" 
 		ProximityPrompt.Parent = zone
+		ProximityPrompt.HoldDuration = 1.25
 		ProximityPrompt.Triggered:Connect(function(player)
 			local MoneyName = zone:GetAttribute("MoneyName") or "Gold"
 			local PlayerMoney = player.leaderstats:WaitForChild(MoneyName)
@@ -63,3 +73,14 @@ for _, zone in pairs(Zones:GetChildren()) do
 	end
 end
 
+RemoteService.TeleportRequest.OnServerEvent:Connect(function(player, buttonName)
+	local ZonesBool = player.OpenedZones:WaitForChild(buttonName)
+	if ZonesBool.Value == true then
+		local TeleportPoint = TeleportPoints:WaitForChild(buttonName)
+		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			player.Character.HumanoidRootPart.CFrame = TeleportPoint.CFrame
+		end
+	else
+		print("You can't teleport to this zone")
+	end
+end)
